@@ -37,7 +37,7 @@ module Prawn
     # corresponding to the file in the attached files catalog entry node. If
     # hidden, then nil is returned.
     #
-    def attach(src, opts = {})
+    def attach(src, options = {})
       path = Pathname.new(src)
       opts = options.dup
 
@@ -47,7 +47,7 @@ module Prawn
       if path.file?
         data = path.read
         opts = {
-          name: path.basename,
+          name: File.basename(src),
           creation_date: path.birthtime,
           modification_date: path.mtime
         }.merge(opts)
@@ -56,8 +56,8 @@ module Prawn
       end
 
       file = EmbeddedFile.new(data, opts)
-      file_obj = file_registry[file.checksum]
 
+      file_obj = file_registry[file.checksum]
       if file_obj.nil?
         file_obj = file.build_pdf_object(self)
         file_registry[file.checksum] = file_obj

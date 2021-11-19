@@ -5,7 +5,12 @@ RSpec.describe Prawn::Attachment do
     expect(Prawn::Attachment::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(false)
+  it "does something useful without failing" do
+    expect do
+      Prawn::Document.generate("hello.pdf") do
+        text "Hello Spec!"
+        attach "./example/data.json"
+      end
+    end.not_to raise_error
   end
 end

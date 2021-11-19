@@ -7,7 +7,7 @@ module Prawn
 
       attr_reader :checksum
 
-      def intialize(data, options = {})
+      def initialize(data, options = {})
         @creation_date = options[:creation_date]
         @creation_date = Time.now.utc unless @creation_date.is_a?(Time)
   

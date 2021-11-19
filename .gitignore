@@ -7,3 +7,5 @@
 /spec/reports/
 /tmp/
 *.gem
+*.pdf
+.rspec_status
