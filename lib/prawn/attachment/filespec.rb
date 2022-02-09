@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'digest'
+require "digest"
 
 module Prawn
   module Attachment
-
+    # FileSpec corresponds to the PDF file specification object.
     class Filespec
       attr_reader :file_name
 
