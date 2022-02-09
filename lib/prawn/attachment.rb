@@ -8,6 +8,7 @@ require_relative "attachment/embedded_file"
 require_relative "attachment/filespec"
 
 module Prawn
+  # Module that supports attachment of file data into a Prawn::Document
   module Attachment
     include PDF::Core::EmbeddedFiles
 
@@ -39,47 +40,52 @@ module Prawn
     #
     def attach(src, options = {})
       path = Pathname.new(src)
-      opts = options.dup
 
-      raise ArgumentError, 'Data source can\'t be a directory' if path.directory?
-      
-      # Determine what sort of source we're dealing with
-      if path.file?
-        data = path.read
-        opts = {
-          name: File.basename(src),
-          creation_date: path.birthtime,
-          modification_date: path.mtime
-        }.merge(opts)
-      else
-        data = src
-      end
+      raise ArgumentError, "Data source can't be a directory" if path.directory?
 
+      data, opts = data_and_opts(path, src, options)
       file = EmbeddedFile.new(data, opts)
 
-      file_obj = file_registry[file.checksum]
-      if file_obj.nil?
-        file_obj = file.build_pdf_object(self)
-        file_registry[file.checksum] = file_obj
-      end
-
-      filespec = Filespec.new(file_obj, opts)
+      filespec = Filespec.new(file_obj_from_registry(file), opts)
       filespec_obj = filespec.build_pdf_object(self)
 
-      unless filespec.hidden?
-        attach_file(filespec.file_name, filespec_obj)
-      end
+      attach_file(filespec.file_name, filespec_obj) unless filespec.hidden?
     end
 
     private
 
+    def data_and_opts(path, src, options)
+      opts = options.dup
+      return [src, opts] unless path.file?
+
+      opts = {
+        name: File.basename(src),
+        creation_date: creation_time(path),
+        modification_date: path.mtime
+      }.merge(opts)
+      [path.read, opts]
+    end
+
+    def file_obj_from_registry(file)
+      file_obj = file_registry[file.checksum]
+      return file_obj if file_obj
+
+      file_obj = file.build_pdf_object(self)
+      file_registry[file.checksum] = file_obj
+      file_obj
+    end
+
+    def creation_time(path)
+      path.birthtime
+    rescue NotImplementedError
+      Time.now
+    end
+
     def file_registry
       @file_registry ||= {}
     end
-
   end
-
 end
 
 # Add ourselves to prawn
-Prawn::Document.send :include, Prawn::Attachment
+Prawn::Document.include Prawn::Attachment

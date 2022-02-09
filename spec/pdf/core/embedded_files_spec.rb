@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 class EmbeddedFiles
   include PDF::Core::EmbeddedFiles
@@ -27,19 +27,19 @@ class EmbeddedFiles
 end
 
 RSpec.describe EmbeddedFiles do
-  it 'has an empty catalog object' do
+  it "has an empty catalog object" do
     t = described_class.new
     pdf_object = "2 0 obj\n<< /Type /Names\n>>\nendobj\n"
     expect(t.names.object).to eq pdf_object
   end
 
-  it 'has an embedded files object with no names' do
+  it "has an embedded files object with no names" do
     t = described_class.new
     pdf_object = "3 0 obj\n<< /Names []\n>>\nendobj\n"
     expect(t.embedded_files.object).to eq pdf_object
   end
 
-  it 'has a catalog object with an embedded files reference' do
+  it "has a catalog object with an embedded files reference" do
     t = described_class.new
     t.embedded_files
 
@@ -47,9 +47,9 @@ RSpec.describe EmbeddedFiles do
     expect(t.names.object).to eq pdf_object
   end
 
-  it 'has an embedded files object with one name reference' do
+  it "has an embedded files object with one name reference" do
     t = described_class.new
-    file_name = PDF::Core::LiteralString.new('my_file')
+    file_name = PDF::Core::LiteralString.new("my_file")
 
     t.add_embedded_file(file_name, t.ref!(Type: :Filespec))
 

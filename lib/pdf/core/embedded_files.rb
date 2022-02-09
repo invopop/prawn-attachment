@@ -2,11 +2,10 @@
 
 module PDF
   module Core
-
-    module EmbeddedFiles #:nodoc:
+    module EmbeddedFiles # :nodoc:
       # The maximum number of children to fit into a single node in the
       # EmbeddedFiles tree.
-      NAME_TREE_CHILDREN_LIMIT = 20 #:nodoc:
+      NAME_TREE_CHILDREN_LIMIT = 20 # :nodoc:
 
       # The EmbeddedFiles name tree in the Name dictionary (see
       # Prawn::Document::Internal#names). This name tree is used to store named
