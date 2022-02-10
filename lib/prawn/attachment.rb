@@ -39,7 +39,7 @@ module Prawn
     # hidden, then nil is returned.
     #
     def attach(src, options = {})
-      raise ArgumentError, "Data source can't be a directory" if is_directory?(src)
+      raise ArgumentError, "Data source can't be a directory" if directory?(src)
 
       data, opts = data_and_opts(src, options)
       file = EmbeddedFile.new(data, opts)
@@ -52,13 +52,13 @@ module Prawn
 
     private
 
-    def is_file?(path)
+    def file?(path)
       File.file?(path)
     rescue ArgumentError
       false
     end
 
-    def is_directory?(path)
+    def directory?(path)
       File.directory?(path)
     rescue ArgumentError
       false
@@ -66,7 +66,7 @@ module Prawn
 
     def data_and_opts(src, options)
       opts = options.dup
-      return [src, opts] unless is_file?(src)
+      return [src, opts] unless file?(src)
 
       path = Pathname.new(src)
       opts = {
