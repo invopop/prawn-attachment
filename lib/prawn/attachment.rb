@@ -68,6 +68,7 @@ module Prawn
       opts = options.dup
       return [src, opts] unless is_file?(src)
 
+      path = Pathname.new(src)
       opts = {
         name: File.basename(src),
         creation_date: creation_time(path),
