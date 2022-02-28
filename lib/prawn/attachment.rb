@@ -75,11 +75,12 @@ module Prawn
       return options.dup unless file?(src)
 
       path = Pathname.new(src)
-      options.dup.reverse_merge(
+
+      {
         name: File.basename(src),
         creation_date: creation_time(path),
         modification_date: path.mtime
-      )
+      }.merge(options.dup)
     end
 
     def file_obj_from_registry(file)
