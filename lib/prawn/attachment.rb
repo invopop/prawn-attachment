@@ -53,15 +53,15 @@ module Prawn
     private
 
     def file?(path)
+      return false if path.include?("\u0000")
+
       File.file?(path)
-    rescue ArgumentError
-      false
     end
 
     def directory?(path)
+      return false if path.include?("\u0000")
+
       File.directory?(path)
-    rescue ArgumentError
-      false
     end
 
     def data_and_opts(src, options)
