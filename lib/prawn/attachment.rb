@@ -41,7 +41,8 @@ module Prawn
     def attach(src, options = {})
       raise ArgumentError, "Data source can't be a directory" if directory?(src)
 
-      data, opts = data_and_opts(src, options)
+      data = data_from_src(src)
+      opts = opts_from_src(src, options)
       file = EmbeddedFile.new(data, opts)
 
       filespec = Filespec.new(file_obj_from_registry(file), opts)
@@ -64,17 +65,21 @@ module Prawn
       File.directory?(path)
     end
 
-    def data_and_opts(src, options)
-      opts = options.dup
-      return [src, opts] unless file?(src)
+    def data_from_src(src)
+      return src unless file?(src)
+
+      Pathname.new(src).read.b
+    end
+
+    def opts_from_src(src, options = {})
+      return options.dup unless file?(src)
 
       path = Pathname.new(src)
-      opts = {
+      options.dup.reverse_merge(
         name: File.basename(src),
         creation_date: creation_time(path),
         modification_date: path.mtime
-      }.merge(opts)
-      [path.read, opts]
+      )
     end
 
     def file_obj_from_registry(file)
