@@ -9,7 +9,7 @@ RSpec.describe Prawn::Attachment do
     expect do
       Prawn::Document.generate("hello.pdf") do
         text "Hello Spec!"
-        attach "./example/data.json"
+        attach "data.json", File.read("./example/data.json")
       end
     end.not_to raise_error
   end
