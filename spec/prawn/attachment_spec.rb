@@ -5,11 +5,20 @@ RSpec.describe Prawn::Attachment do
     expect(Prawn::Attachment::VERSION).not_to be nil
   end
 
-  it "does something useful without failing" do
+  it "attaches an IO object" do
     expect do
       Prawn::Document.generate("hello.pdf") do
         text "Hello Spec!"
-        attach "./example/data.json"
+        attach "data.json", File.open("./example/data.json")
+      end
+    end.not_to raise_error
+  end
+
+  it "attaches a string" do
+    expect do
+      Prawn::Document.generate("hello.pdf") do
+        text "Hello Spec!"
+        attach "data.json", File.read("./example/data.json")
       end
     end.not_to raise_error
   end
