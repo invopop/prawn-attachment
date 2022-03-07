@@ -12,38 +12,42 @@ module Prawn
   module Attachment
     include PDF::Core::EmbeddedFiles
 
-    class Error < StandardError; end
+    # Missing data error
+    class NoDataError < StandardError
+      def message
+        "Source data is empty"
+      end
+    end
 
-    # Attach a file's data to the document. Any kind of data with
-    # a string representation can be embedded.
+    # Attach a file's data to the document. File IO Objects are expected.
     #
     # Arguments:
-    # <tt>src</tt>:: path to file, data string, or an object that responds to #to_str
-    # and #length.
+    # <tt>name</tt>:: name of attachment.
+    # <tt>src</tt>:: String or IO object containing source file data.
     #
     # Options:
-    # <tt>:name</tt>:: explicit default filename override.
-    # <tt>:creation_date</tt>:: date when the file was created.
-    # <tt>:modification_date</tt>::  date when the file was last modified.
+    # <tt>:created_at</tt>:: timestamp when the file was created.
+    # <tt>:modified_at</tt>::  timestamp for when file was last modified.
     # <tt>:description</tt>:: file description.
     # <tt>:hidden</tt>:: if true, prevents the file from appearing in the
     # catalog. (default false)
     #
     #   Prawn::Document.generate("file1.pdf") do
     #     path = "#{Prawn::DATADIR}/images/dice.png"
-    #     attach path, description: 'Example of an attached image file'
+    #     attach "dice.png", File.open(path), description: 'Example of an attached image file'
     #   end
     #
     # This method returns an instance of PDF::Core::NameTree::Value
     # corresponding to the file in the attached files catalog entry node. If
     # hidden, then nil is returned.
     #
-    def attach(src, options = {})
-      path = Pathname.new(src)
+    def attach(name, src, opts = {})
+      data = src.is_a?(IO) ? src.read : src.b
+      raise NoDataError if data.length.zero?
 
-      raise ArgumentError, "Data source can't be a directory" if path.directory?
+      opts = prepare_options(name, opts)
 
-      data, opts = data_and_opts(path, src, options)
+      # Prepare embeddable representation of the source data
       file = EmbeddedFile.new(data, opts)
 
       filespec = Filespec.new(file_obj_from_registry(file), opts)
@@ -54,18 +58,18 @@ module Prawn
 
     private
 
-    def data_and_opts(path, src, options)
-      opts = options.dup
-      return [src, opts] unless path.file?
-
-      opts = {
-        name: File.basename(src),
-        creation_date: creation_time(path),
-        modification_date: path.mtime
-      }.merge(opts)
-      [path.read, opts]
+    def prepare_options(name, opts)
+      {
+        name: name,
+        creation_date: opts[:created_at] || Time.now.utc,
+        modification_date: opts[:modified_at] || Time.now.utc,
+        description: opts[:description],
+        hidden: !!opts[:hidden]
+      }
     end
 
+    # attempt to find a previously stored version of the embedded file in the
+    # registry, just in case the same file is attached twice with different names.
     def file_obj_from_registry(file)
       file_obj = file_registry[file.checksum]
       return file_obj if file_obj
@@ -73,12 +77,6 @@ module Prawn
       file_obj = file.build_pdf_object(self)
       file_registry[file.checksum] = file_obj
       file_obj
-    end
-
-    def creation_time(path)
-      path.birthtime
-    rescue NotImplementedError
-      Time.now
     end
 
     def file_registry

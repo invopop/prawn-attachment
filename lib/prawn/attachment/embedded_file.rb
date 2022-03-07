@@ -4,9 +4,11 @@ module Prawn
   module Attachment
     # EmbeddedFile represents a file to be embedded in the PDF.
     class EmbeddedFile
-      attr_reader :checksum
+      attr_reader :data, :creation_date, :modification_date, :checksum
 
       def initialize(data, options = {})
+        @data = data
+
         @creation_date = options[:creation_date]
         @creation_date = Time.now.utc unless @creation_date.is_a?(Time)
 
@@ -14,7 +16,6 @@ module Prawn
         @modification_date = Time.now.utc unless @modification_date.is_a?(Time)
 
         @checksum = Digest::MD5.digest(data)
-        @data = data
       end
 
       def build_pdf_object(document)
@@ -37,8 +38,6 @@ module Prawn
           }
         }
       end
-
-      attr_reader :data, :creation_date, :modification_date
     end
   end
 end
