@@ -28,7 +28,7 @@ require "prawn/attachment"
 
 Prawn::Document.generate("hello.pdf") do
   text "Hello World!"
-  attach "./data.json"
+  attach "data.json", File.open("./data.json")
 end
 ```
 
