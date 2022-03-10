@@ -19,6 +19,13 @@ module Prawn
       end
     end
 
+    # Invalid data provided
+    class InvalidDataError < StandardError
+      def message
+        "Source data must be an IO object or string"
+      end
+    end
+
     # Attach a file's data to the document. File IO Objects are expected.
     #
     # Arguments:
@@ -42,9 +49,7 @@ module Prawn
     # hidden, then nil is returned.
     #
     def attach(name, src, opts = {})
-      data = src.is_a?(IO) ? src.read : src.b
-      raise NoDataError if data.length.zero?
-
+      data = extract_data_from_source(src)
       opts = prepare_options(name, opts)
 
       # Prepare embeddable representation of the source data
@@ -57,6 +62,19 @@ module Prawn
     end
 
     private
+
+    def extract_data_from_source(src)
+      if src.respond_to?(:read)
+        data = src.read
+      elsif src.respond_to?(:b)
+        data = src.b
+      else
+        raise InvalidDataError
+      end
+      raise NoDataError if data.length.zero?
+
+      data
+    end
 
     def prepare_options(name, opts)
       {
