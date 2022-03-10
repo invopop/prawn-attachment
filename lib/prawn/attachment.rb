@@ -65,7 +65,7 @@ module Prawn
 
     def extract_data_from_source(src)
       if src.respond_to?(:read)
-        data = src.read
+        data = src.read.b
       elsif src.respond_to?(:b)
         data = src.b
       else
